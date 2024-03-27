@@ -1,6 +1,10 @@
 #!/bin/bash
-#Marco A. Villena
-#nokickout
+# NOKICKOUT
+# ---------
+
+# Author: Marco A. Villena (@)
+# Date: 2023 - 2024
+
 
 version="2.0"
 

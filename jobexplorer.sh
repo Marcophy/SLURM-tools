@@ -1,7 +1,10 @@
 #!/bin/bash
-#Marco A. Villena
-#jobexplorer
-#Version 5.0
+# JOBEXPLORER
+# -----------
+
+# Author: Marco A. Villena (@)
+# Date: 2020 - 2024
+
 
 version="5.0"
 
