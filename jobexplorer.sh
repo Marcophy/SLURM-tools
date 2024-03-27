@@ -21,6 +21,7 @@ do
 	echo -e "5 - Jobs folders"
 	echo -e "6 - Jobs record"
 	echo -e "7 - Job statistic"
+	echo -e "8 - Users and jobs"
 	echo -e "0 - Exit\e[0m"
 	echo " "
 	echo -n "Select one option [1-6,0]: "
@@ -100,6 +101,23 @@ do
 	   echo " "
 	   sstat $jstat
 	   read foo;;
+
+	8) echo -e "\n\e[0;95m**** USERS AND THEIR JOBS ****\e[0m\n"
+	   name_list=$(squeue -O UserName)
+	   name_list="${name_list#* }"
+
+	   declare -A counter
+
+	   for name in $name_list; do
+	       ((counter[$name]++))
+	   done
+
+	   echo -e "\e[0;92mUSER: Submitted jobs"
+	   echo -e "--------------------\e[0m"
+	   for name in "${!counter[@]}"; do
+	       echo -e "$name: ${counter[$name]}"
+	   done
+           read foo;;
 
 	0) echo -e "\nHave a good day!\n"
 	   exit 1;;
