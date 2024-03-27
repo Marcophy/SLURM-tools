@@ -6,7 +6,7 @@
 # Date: 2020 - 2024
 
 
-version="5.0"
+version="6.0"
 
 while :
 do
