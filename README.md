@@ -62,7 +62,7 @@ The script assumes a typical Slurm environment where the current user is identif
 
 ## NOKICKOUT
 
-Small utility script to periodically update terminal activity and avoid idle disconnections if the cluster has a limit on the connection time without activity.
+Small toy utility script to periodically update terminal activity and avoid idle disconnections if the cluster has a limit on the connection time without activity.
 
 ### Overview
 
@@ -82,6 +82,8 @@ This behavior can help keep interactive sessions alive on systems that disconnec
 - Bash shell.
 - A terminal that supports ANSI escape sequences for color.
 - For *Animation mode*: a directory called *frames* containing all frames from the animation.
+   - The frame files hace extension *.frm.
+   - These file are text files with each frame of the animation using ASCII images.
 
 ### Installation suggestions
 1. Copy `nokickout.sh` to a directory of your choice, for example, `$HOME/bin`.
