@@ -4,13 +4,21 @@
 # Author: Marco A. Villena (mavillena@ugr.es)
 # Date: 2020 - 2026
 
-version="6.0"
+version="6.1"
+
+#Colors
+PURPLE='\e[0;95m'
+YELLOW='\e[0;33m'
+GREEN='\e[0;92m'
+RED='\e[0;91m'
+REDYELLOW='\e[41;93m'
+NC='\e[0m'
 
 while :
 do
 	clear
-	echo -e "\e[0;95m#### JOBS EXPLORER ####\nVersion $version\n"
-	echo -e "\e[0;33m OPTIONS"
+	echo -e "${PURPLE}#### JOBS EXPLORER ####\nVersion $version\n"
+	echo -e "${YELLOW} OPTIONS"
 	echo "---------"
 	echo -e "1 - Display status of your jobs"
 	echo -e "2 - Check in loop"
@@ -19,39 +27,40 @@ do
 	echo -e "5 - Jobs folders"
 	echo -e "6 - Jobs record"
 	echo -e "7 - Job statistic"
-	echo -e "8 - Users and jobs (slow)"
-	echo -e "0 - Exit\e[0m"
+	echo -e "8 - User and jobs (${RED}slow${YELLOW})"
+	echo -e "0 - Exit${NC}"
 	echo " "
 	echo -n "Select one option [1-6,0]: "
 	read option
 	echo " "
 
 	case $option in
-	1) echo -e "\n\e[0;95m**** LIST OF JOBS STATUS ****\e[0m\n"
-	   echo -e "\e[0;92m$(squeue -u $USER -r -l -O jobid,name,state,timeused,Account,Reason)\e[0m"
+	1) echo -e "\n${PURPLE}**** LIST OF JOBS STATUS ****${NC}\n"
+	   echo -e "${GREEN}$(squeue -u $USER -r -l -O jobid,name,state,timeused,Account,Reason)${NC}"
+	   echo -e "\nPress ENTER to continue ..."
 	   read foo;;
 
-	2) echo -e "\n\e[0;95m**** LOOP SCAN ****\e[0m\n"
+	2) echo -e "\n${PURPLE}**** LOOP SCAN ****${NC}\n"
             echo -n "Refresh rate (seconds): "
             read dela
             while true; do
                 clear
-                echo -e "\e[0;32m$(squeue -u $USER -l -O jobarrayid,name,state,timeused)"
+                echo -e "${GREEN}$(squeue -u $USER -l -O jobarrayid,name,state,timeused)"
 
-                echo -e "\n\e[0;91mPress Ctrl+c to exit.\e[0m"
+                echo -e "\n${RED}Press Ctrl+c to exit.${NC}"
                 sleep $dela
             done
             read foo;;
 	    
-	3) echo -e "\n\e[0;95m**** CANCEL A JOB ****\e[0m\n"
-	   echo -e "\e[0;92m$(squeue -u $USER -r -l -O jobid,jobarrayid,name,state,timeused)\e[0m\n"
+	3) echo -e "\n${PURPLE}**** CANCEL A JOB ****${NC}\n"
+	   echo -e "${GREEN}$(squeue -u $USER -r -l -O jobid,jobarrayid,name,state,timeused)${NC}\n"
 	   echo -n "Write the ID of the job (C-Cancel): "
 	   read jcancel
 	   if [ $jcancel = "C" ]; then
 	       echo -e "\nOPERATION CANCELLED. Press enter to continue.\n"
 	   else
 	       if grep -q "$jcancel" <<< "$(squeue -r -u $USER --jobs $jcancel -l -O jobid,jobarrayid)"; then
-		   echo -e "\nAre you sure you want to cancel the job \e[0;33m$jcancel\e[0m?"
+		   echo -e "\nAre you sure you want to cancel the job ${YELLOW}$jcancel${NC}?"
 		   select QCON in "YES" "NO"; do
 	       	       case $QCON in
 			   YES)
@@ -64,12 +73,12 @@ do
 		       esac
 		   done
 	       else
-		   echo -e "\e[41;93mERROR! The jobID $jcancel does not match any submitted jobs.\e[0m\n"
+		   echo -e "${REDYELLOW}ERROR! The jobID $jcancel does not match any submitted jobs.${NC}\n"
 	       fi
 	   fi
 	   read foo;;
 	
-	4) echo -e "\n\e[0;95m**** CANCEL ALL JOBS ****\e[0m\n"
+	4) echo -e "\n${PURPLE}**** CANCEL ALL JOBS ****${NC}\n"
 	   echo "Are you sure you want to cancel all your jobs in squeue?"
 	   select QCON in "Yes" "No"; do
 	       case $QCON in
@@ -84,23 +93,31 @@ do
 	   done
 	   read foo;;
 
-	5) echo -e "\n\e[0;95m**** JOBS FOLDER ****\e[0m\n"
-	   echo -e "\e[0;92m$(squeue -u $USER -o %i,%j,%Z)\e[0m"
+	5) echo -e "\n${PURPLE}**** JOBS FOLDER ****${NC}\n"
+	   printf "${GREEN}%-10s %-30s %s\n" "JOBID" "NAME" "WORKDIR"
+	   printf "%-10s %-30s %s\n" "-----" "----" "-------"
+	   squeue -u $USER --noheader --format="%.18A %.30j %Z" |
+	       while read -r jobid name workdir; do
+		   printf "%-10s %-30s %s\n" "$jobid" "$name" "$workdir"
+	       done
+	   echo -e "\n${NC}Press ENTER to continue ..."
 	   read foo;;
 
-	6) echo -e "\n\e[0;95m**** JOBS RECORDS ****\e[0m\n"
+	6) echo -e "\n${PURPLE}**** JOBS RECORDS ****${NC}\n"
 	   sacct -u $USER
+	   echo -e "\nPress ENTER to continue ..."
 	   read foo;;
 
-	7) echo -e "\n\e[0;95m**** JOB STATISTIC ****\e[0m\n"
-	   echo -e "\e[0;92m$(squeue -u $USER -l -O jobid,jobarrayid,name,state,timeused,nodelist)\e[0m\n"
+	7) echo -e "\n${PURPLE}**** JOB STATISTIC ****${NC}\n"
+	   echo -e "${GREEN}$(squeue -u $USER -l -O jobid,jobarrayid,name,state,timeused,nodelist)${NC}\n"
 	   echo -n "Write the ID of the job: "
 	   read jstat
 	   echo " "
 	   sstat $jstat
+	   echo -e "\nPress ENTER to continue ..."
 	   read foo;;
 
-	8) echo -e "\n\e[0;95m**** USERS AND THEIR JOBS ****\e[0m\n"
+	8) echo -e "\n${PURPLE}**** USERS AND THEIR JOBS ****${NC}\n"
 	   # Define the states of interest
 	   STATES_OF_INTEREST=("RUNNING" "PENDING" "COMPLETING")
 	   OTHER_STATES=("BOOT_FAIL" "CANCELLED" "COMPLETED" "CONFIGURING" "DEADLINE" "FAILED" "NODE_FAIL" "OUT_OF_MEMORY" "PREEMPTED" "RESV_DEL_HOLD" "REQUEUE_FED" "REQUEUE_HOLD" "REQUEUED" "RESIZING" "REVOKED" "SIGNALING" "SPECIAL_EXIT" "STAGE_OUT" "STOPPED" "SUSPENDED" "TIMEOUT")
@@ -177,13 +194,15 @@ do
 	   done
 
 	   printf "%-20s %10d %10d %12d %10d\n" "TOTAL" "$total_running" "$total_pending" "$total_completing" "$total_other"
+
+	   echo -e "\nPress ENTER to continue ..."
 	   read foo;;
 
 	0) echo -e "\nHave a good day!\n"
 	   exit 1;;
 
 	*) echo " "
-	   echo -e "\n\e[41;93m$option is an invalid option. Please, try again!\e[0m"
+	   echo -e "\n\e[41;93m$option is an invalid option. Please, try again!${NC}"
 	   read foo;;
 	esac
 done
