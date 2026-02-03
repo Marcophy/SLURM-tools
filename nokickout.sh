@@ -2,8 +2,8 @@
 # NOKICKOUT
 # ---------
 
-# Author: Marco A. Villena (@)
-# Date: 2023 - 2024
+# Author: Marco A. Villena (mavillena@ugr.es)
+# Date: 2023 - 2026
 
 
 version="2.0"
