@@ -1,34 +1,52 @@
 #!/bin/bash
 # NOKICKOUT
 # ---------
-
 # Author: Marco A. Villena (mavillena@ugr.es)
 # Date: 2023 - 2026
 
+# Version
+version="3.0"
 
-version="2.0"
+# Colors
+PURPLE='\e[0;95m'
+GREEN='\e[0;92m'
+RED='\e[0;91m'
+REDYELLOW='\e[41;93m'
+NC='\e[0m'
+
+# Frames folder
+FRAME_DIR="$HOME/my_scripts/frames"
 
 if [ -z $1 ]; then
-    dela=600
+    dela=60 # Refresh delay
 
     clear
-    echo -e "\e[0;95m**** NO KICK OUT ****\e[0m\nVersion $version\n"
+    echo -e "${PURPLE}**** NO KICK OUT ****${NC}\nVersion $version"
+    echo -e "\n${RED}Press Ctrl+c to exit.\n${NC}"
     
     while true; do
-	date
-	sleep $dela
+		echo $(TZ="Europe/Madrid" date) # "+%Y-%m-%d %H:%M:%S")
+		sleep $dela
     done
 
 elif [ $1 = '-w' ]; then
-    dela=0.2
-    search_dir=$HOME/My_scripts/frames
+    # Check if directory exists
+    if [ ! -d "$FRAME_DIR" ]; then
+		echo -e "${REDYELLOW}ERROR: directory '$FRAME_DIR' does not exist.\n${NC}"
+		exit 1
+    fi
+    
+    dela=0.2 # Refresh delay
     while true; do
-	for entry in "$search_dir"/*; do
-	    clear
-	    echo -e "\e[0;95m**** NO KICK OUT ****\e[0m\nVersion $version\n"
-	    $entry
-	    sleep $dela
-	done
+		for frame in "$FRAME_DIR"/*.frm; do
+	    	[ -e "$frame" ] || echo -e "${REDYELLOW}ERROR: Frames files not found.\n${NC}", exit 1  # Skip if no *.frm files
+	    
+	    	clear
+	    	echo -e "${PURPLE}**** NO KICK OUT ****\e[0m\nVersion $version\n"
+	    	echo -e "${GREEN}"
+	    	cat "$frame"
+	    	echo -e "\n${RED}Press Ctrl+c to exit.${NC}"
+	    	sleep $dela
+		done
     done
 fi
-
