@@ -15,7 +15,7 @@ REDYELLOW='\e[41;93m'
 NC='\e[0m'
 
 # Frames folder
-FRAME_DIR="$HOME/my_scripts/frames"
+FRAME_DIR="$HOME/bin/frames"
 
 if [ -z $1 ]; then
     dela=60 # Refresh delay
