@@ -41,7 +41,10 @@ The main menu shows the following options:
 
 8. **User and jobs (slow)**  
    - Shows a summary of the queue of the cluster. 
-   - Counts, for each user, the number of jobs in the states *RUNNING*, *PENDING*, *COMPLETING*, and groups all other states into *OTHER*.  
+   - Counts, for each user, the number of jobs in the states *RUNNING*, *PENDING*, *COMPLETING*, and groups all other states into *OTHER*.
+
+9. **Partition load (aprox.)**
+    - Shows the load of each partition of the HPC.
 
 0. **Exit**  
    - Exits the script.
@@ -49,7 +52,7 @@ The main menu shows the following options:
 ### Requirements
 
 - Bash shell.  
-- Slurm client commands available in PATH: `squeue`, `scancel`, `sacct`, `sstat`.  
+- Slurm client commands available in PATH: `squeue`, `scancel`, `sacct`, `sstat`, `sinfo`.  
 - A terminal that supports ANSI escape sequences for colors (optional but recommended).
 
 The script assumes a typical Slurm environment where the current user is identified by `$USER`.
