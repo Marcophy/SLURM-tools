@@ -4,9 +4,9 @@
 # Author: Marco A. Villena (mavillena@ugr.es)
 # Date: 2020 - 2026
 
-version="6.1"
+VERSION="6.2"
 
-#Colors
+# Colors
 PURPLE='\e[0;95m'
 YELLOW='\e[0;33m'
 GREEN='\e[0;92m'
@@ -17,7 +17,7 @@ NC='\e[0m'
 while :
 do
         clear
-        echo -e "${PURPLE}#### JOBS EXPLORER ####\nVersion $version\n"
+        echo -e "${PURPLE}########## JOBS EXPLORER ##########\nVersion $VERSION\n- Author: Marco A. Villena\n- Email: mavillena@ugr.es\n"
         echo -e "${YELLOW} OPTIONS"
         echo "---------"
         echo -e "1 - Display status of your jobs"
@@ -28,9 +28,10 @@ do
         echo -e "6 - Jobs record"
         echo -e "7 - Job statistic"
         echo -e "8 - User and jobs (${RED}slow${YELLOW})"
+	echo -e "9 - Partition load (${RED}aprox.${YELLOW})"
         echo -e "0 - Exit${NC}"
         echo " "
-        echo -n "Select one option [1-6,0]: "
+        echo -n "Select one option [1-9,0]: "
         read option
         echo " "
 
@@ -120,8 +121,6 @@ do
         8) echo -e "\n${PURPLE}**** USERS AND THEIR JOBS ****${NC}\n"
            # Define the states of interest
            STATES_OF_INTEREST=("RUNNING" "PENDING" "COMPLETING")
-           OTHER_STATES=("BOOT_FAIL" "CANCELLED" "COMPLETED" "CONFIGURING" "DEADLINE" "FAILED" "NODE_FAIL" "OUT_OF_MEMORY" "PREEMPTED" "RESV_DEL_HOLD" "REQU
-EUE_FED" "REQUEUE_HOLD" "REQUEUED" "RESIZING" "REVOKED" "SIGNALING" "SPECIAL_EXIT" "STAGE_OUT" "STOPPED" "SUSPENDED" "TIMEOUT")
 
            # Variable for storing counters: user_status -> quantity
            declare -A job_counts
@@ -160,7 +159,7 @@ EUE_FED" "REQUEUE_HOLD" "REQUEUED" "RESIZING" "REVOKED" "SIGNALING" "SPECIAL_EXI
            rm /tmp/users_sorted.tmp
 
            # Print table header
-           printf "%-20s %10s %10s %12s %10s\n" "USER" "RUNNING" "PENDING" "COMPLETING" "OTHER"
+           printf "${GREEN}%-20s %10s %10s %12s %10s\n" "USER" "RUNNING" "PENDING" "COMPLETING" "OTHER"
            printf "%s\n" "$(printf '%.0s-' {1..66})"
 
            # Print rows
@@ -196,10 +195,33 @@ EUE_FED" "REQUEUE_HOLD" "REQUEUED" "RESIZING" "REVOKED" "SIGNALING" "SPECIAL_EXI
 
            printf "%-20s %10d %10d %12d %10d\n" "TOTAL" "$total_running" "$total_pending" "$total_completing" "$total_other"
 
-           echo -e "\nPress ENTER to continue ..."
+           echo -e "${NC}\nPress ENTER to continue ..."
            read foo;;
 
-        0) echo -e "\nHave a good day!\n"
+	9) echo -e "\n${PURPLE}**** PARTITION LOAD ****${NC}\n"
+        
+           # Print table header
+	   printf "${GREEN}%-20s %6s / %-6s %10s" "PARTITION" "USING" "TOTAL" "USING(%)"
+	   echo -e "\n-----------------------------------------------"
+	   
+           # Capture sinfo output and calculate server load
+           sinfo -h -o "%P %C" | awk '{
+	      split($2, a, "/")
+    	      alloc = a[1]           # assigned CPUs
+    	      total = a[4]           # total CPUs
+    	      if (total > 0) {
+              	 perc = 100 * alloc / total
+    	      } else {
+              	perc = 0
+    	      }
+              
+    	      printf "%-20s %6d / %-6d  (%6.2f%%)\n", $1, alloc, total, perc
+	      }'
+
+	   echo -e "${NC}\nPress ENTER to continue ..."
+           read foo;;
+	   
+        0) echo -e "${PURPLE}\nHave a good day!${NC}\n"
            exit 1;;
 
         *) echo " "
