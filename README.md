@@ -10,7 +10,10 @@ Interactive helper script to explore and manage your Slurm jobs from the termina
 ### Overview
 
 `jobexplorer.sh` provides an interactive and friendly menu to inspect, monitor, and cancel Slurm jobs, as well as to query job history and user job statistics.  
-It is intended for users of clusters managed by Slurm and uses ANSI colors for improved readability in a terminal. 
+It is intended for users of clusters managed by Slurm and uses ANSI colors for improved readability in a terminal.
+
+> [!NOTE]
+> Some features of this script may be blocked by HPC administrators.
 
 ### Features
 
@@ -39,20 +42,26 @@ The main menu shows the following options:
    - Shows a detailed list of your jobs including node list with `squeue -u $USER -l -O jobid,jobarrayid,name,state,timeused,nodelist`.  
    - Prompts for a job ID and calls `sstat <jobid>` to display runtime statistics for that job.
 
-8. **User and jobs (slow)**  
-   - Shows a summary of the queue of the cluster. 
-   - Counts, for each user, the number of jobs in the states *RUNNING*, *PENDING*, *COMPLETING*, and groups all other states into *OTHER*.
+8. **Partitions available**
+   - Show the partitions avaialble for your user.
 
 9. **Partition load (aprox.)**
-    - Shows the load of each partition of the HPC.
+   - Shows the load of each partition of the HPC.
 
-0. **Exit**  
+10. **User and partititon**
+    - Show the information related to the number of jobs submitted in each partition by each user.
+
+11. **User and jobs (slow)**  
+    - Shows a summary of the queue of the cluster. 
+    - Counts, for each user, the number of jobs in the states *RUNNING*, *PENDING*, *COMPLETING*, and groups all other states into *OTHER*.
+
+e. **Exit**
    - Exits the script.
 
 ### Requirements
 
 - Bash shell.  
-- Slurm client commands available in PATH: `squeue`, `scancel`, `sacct`, `sstat`, `sinfo`.  
+- Slurm client commands available in PATH: `squeue`, `scancel`, `sacct`, `sacctmgr`, `sstat`, `sinfo`.  
 - A terminal that supports ANSI escape sequences for colors (optional but recommended).
 
 The script assumes a typical Slurm environment where the current user is identified by `$USER`.
