@@ -4,7 +4,7 @@
 # Author: Marco A. Villena (mavillena@ugr.es)
 # Date: 2020 - 2026
 
-VERSION="6.3"
+VERSION="6.4"
 
 # Colors
 PURPLE='\e[0;95m'
@@ -27,19 +27,20 @@ do
         echo -e "5 - Jobs folders"
         echo -e "6 - Jobs record"
         echo -e "7 - Job statistic"
-        echo -e "8 - Partition load (${RED}aprox.${YELLOW})"
-        echo -e "9 - User and partition"
-        echo -e "0 - User and jobs (${RED}slow${YELLOW})"
+        echo -e "8 - Partitions available"
+        echo -e "9 - Partition load (${RED}aprox.${YELLOW})"
+        echo -e "10 - User and partition"
+        echo -e "11 - User and jobs (${RED}slow${YELLOW})"
         echo -e "=================================="
         echo -e "e - Exit${NC}"
         echo " "
-        echo -n "Select one option [1-9,0]: "
+        echo -n "Select one option: "
         read option
         echo " "
 
         case $option in
         1) echo -e "\n${PURPLE}**** LIST OF JOBS STATUS ****${NC}\n"
-           echo -e "${GREEN}$(squeue -u $USER -r -l -O jobid,name,state,timeused,Account,Reason)${NC}"
+           echo -e "${GREEN}$(squeue -u $USER -r -l -O jobid,name,state,timeused,Partition,Reason)${NC}"
            echo -e "\nPress ENTER to continue ..."
            read foo;;
 
@@ -48,7 +49,7 @@ do
             read dela
             while true; do
                 clear
-                echo -e "${GREEN}$(squeue -u $USER -l -O jobarrayid,name,state,timeused)"
+                echo -e "${GREEN}$(squeue -u $USER -l -O jobarrayid,name,state,timeused,Partition)"
 
                 echo -e "\n${RED}Press Ctrl+c to exit.${NC}"
                 sleep $dela
@@ -120,82 +121,91 @@ do
            echo -e "\nPress ENTER to continue ..."
            read foo;;
 
-        8) echo -e "\n${PURPLE}**** PARTITION LOAD ****${NC}\n"
+        8) echo -e "\n${PURPLE}**** PARTITION AVAILABLE ****${NC}\n"
+           # Print table header
+           sacctmgr show assoc user=$USER format=Cluster,Account,User,QOS,DefaultQOS
+
+           echo -e "${NC}\nPress ENTER to continue ..."
+           read foo;;
+
+        9) echo -e "\n${PURPLE}**** PARTITION LOAD ****${NC}\n"
+
            # Print table header
            printf "${GREEN}%-20s %6s / %-6s %10s" "PARTITION" "USING" "TOTAL" "USING(%)"
            echo -e "\n-----------------------------------------------"
 
            # Capture sinfo output and calculate server load
            sinfo -h -o "%P %C" | awk '{
-               split($2, a, "/")
-               alloc = a[1]        # Assigned CPUs
-               total = a[4]        # Total CPUs
-               if (total > 0) {
-                   perc = 100 * alloc / total
-               } else {
-                   perc = 0
-               }
-               printf "%-20s %6d / %-6d  (%6.2f%%)\n", $1, alloc, total, perc
-               }'
+              split($2, a, "/")
+              alloc = a[1]        # Assigned CPUs
+              total = a[4]        # Total CPUs
+              if (total > 0) {
+                 perc = 100 * alloc / total
+              } else {
+                perc = 0
+              }
+
+              printf "%-20s %6d / %-6d  (%6.2f%%)\n", $1, alloc, total, perc
+              }'
 
            echo -e "${NC}\nPress ENTER to continue ..."
            read foo;;
 
-        9) echo -e "\n${PURPLE}**** USER and PARTITIONS ****${NC}\n"
-           USER_W=15
-           COL_W=14
+        10) echo -e "\n${PURPLE}**** USER and PARTITIONS ****${NC}\n"
+            USER_W=15
+            COL_W=14
 
-           # Getting the partition list (default partition indicated by *)
-           readarray -t PARTITIONS < <(
-               sinfo -h -o "%P" | sed 's/\*//g' | sort -u
-           )
+            # Getting the partition list (default partition indicated by *)
+            readarray -t PARTITIONS < <(
+                sinfo -h -o "%P" | sed 's/\*//g' | sort -u
+            )
 
-           # Header
-           printf "%-${USER_W}s" "USER"
-           for p in "${PARTITIONS[@]}"; do
-               printf " %-${COL_W}s" "$p"
-           done
-           echo "\n"
+            # Header
+            printf "%-${USER_W}s" "USER"
+            for p in "${PARTITIONS[@]}"; do
+                 printf " %-${COL_W}s" "$p"
+            done
+            echo "\n"
 
-           # Separation line
-           total_width=$USER_W
-           for _ in "${PARTITIONS[@]}"; do
-               total_width=$((total_width + 1 + COL_W))
-           done
-           printf '%*s\n' "$total_width" '' | tr ' ' '-'
+            # Separation line
+            total_width=$USER_W
+            for _ in "${PARTITIONS[@]}"; do
+                 total_width=$((total_width + 1 + COL_W))
+            done
+            printf '%*s\n' "$total_width" '' | tr ' ' '-'
 
-           # Data user and jobs per partition
-           squeue -h -o "%u %P" | \
-           awk -v parts="$(IFS=' '; echo "${PARTITIONS[*]}")" -v user_w="$USER_W" -v col_w="$COL_W" '
-           BEGIN {
+            # Data user and jobs per partition
+            squeue -h -o "%u %P" | \
+            awk -v parts="$(IFS=' '; echo "${PARTITIONS[*]}")" -v user_w="$USER_W" -v col_w="$COL_W" '
+            BEGIN {
                  n = split(parts, P, " ")
-           }
-           {
+            }
+            {
                  user = $1
                  part = $2
                  gsub(/\*/, "", part)
 
                  users[user] = 1
                  counts[user, part]++
-           }
-           END {
-                for (u in users) {
-                     line = sprintf("%-" user_w "s", u)
-                     for (i = 1; i <= n; i++) {
-                         pp = P[i]
-                         c = counts[u, pp]
-                         if (c == "") c = 0
-                         line = sprintf("%s %-" col_w "d", line, c)
-                     }
-                     print line
-                }
-           }
-           ' | sort
+            }
+            END {
+                 for (u in users) {
+                      line = sprintf("%-" user_w "s", u)
+                      for (i = 1; i <= n; i++) {
+                           pp = P[i]
+                           c = counts[u, pp]
+                           if (c == "") c = 0
+                           line = sprintf("%s %-" col_w "d", line, c)
+                      }
+                      print line
+                 }
+            }
+            ' | sort
 
-           echo -e "${NC}\nPress ENTER to continue ..."
-           read foo;;
+            echo -e "${NC}\nPress ENTER to continue ..."
+            read foo;;
 
-        0) echo -e "\n${PURPLE}**** USERS AND THEIR JOBS ****${NC}\n"
+        11) echo -e "\n${PURPLE}**** USERS AND THEIR JOBS ****${NC}\n"
            # Define the states of interest
            STATES_OF_INTEREST=("RUNNING" "PENDING" "COMPLETING")
 
