@@ -13,7 +13,7 @@ Interactive helper script to explore and manage your Slurm jobs from the termina
 It is intended for users of clusters managed by Slurm and uses ANSI colors for improved readability in a terminal.
 
 > [!NOTE]
-> Some features of this script may be blocked by HPC administrators. You can use the variable *HPCNAME* to distinguish between different versions of this script for each HPC.
+> Certain functions in this script may work differently or be blocked by HPC administrators. Therefore, you may need to make some modifications to the code yourself. The *HPCNAME* variable is used to distinguish between different versions of this script for each HPC.
 
 ### Features
 
