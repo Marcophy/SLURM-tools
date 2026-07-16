@@ -31,8 +31,10 @@ The main menu shows the following options:
    2. **Partition load (aprox.)**: Shows the load of each partition of the HPC.
    3. **User and partititon**: Show the information related to the number of jobs submitted in each partition by each user.
    4. **User and jobs (slow)**: Shows a summary of the queue of the cluster. Counts, for each user, the number of jobs in the states *RUNNING*, *PENDING*, *COMPLETING*, and groups all other states into *OTHER*.
-9. **Module options >>**
-   1. **Search for tool in module list**: Look for the name of a tool in the module available list.
+9. **Tools >>**
+   1. **Submission file generator (*beta*)**: Tool for helping to create submission files.
+   2. **Search for tool in module list**: Look for the name of a tool in the module available list.
+   3. **No kick-out**: Toy to prevent the system from closing the connection due to inactivity.
 
 ### Requirements
 
@@ -44,9 +46,15 @@ The script assumes a typical Slurm environment where the current user is identif
 
 ### Installation suggestions
 
-1. Copy `jobexplorer.sh` to a directory of your choice. For example `$HOME/bin`.
-2. Make it executable: ```chmod +x jobexplorer.sh```
-3. Create a new alias in your .bashrc file (or equivalent) for this new tool. For example ```alias explorer="sh $HOME/bin/jobexplorer.sh"```
+1. Create a new folder called `jobexplorer` to a directory of your choice. For example `$HOME/bin/jobexplorer`.
+2. Copy all files from this repository in that folder.
+3. Make it executable: ```chmod +x *.sh```
+4. Add to `.bashrc` file the following variable and reload the file:
+   1. ```echo 'export JOBEXPLORERPATH="$HOME/bin/jobexplorer"' >> ~/.bashrc```
+   2. ```echo 'export MYEMAIL="mavillena@ugr.es"' >> ~/.bashrc```
+   3. ```source ~/.bashrc```
+5. Create a new alias in your .bashrc file (or equivalent) for this new tool. For example ```alias explorer="sh JOBEXPLORERPATH/jobexplorer.sh"```
+6. Fill out the file `partitions.info` with the information related to the partitions of the HPC you are using.
 
 ## NOKICKOUT
 
