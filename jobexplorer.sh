@@ -5,7 +5,9 @@
 # Author: Marco A. Villena (mavillena@ugr.es)
 # Date: 2020 - 2026
 
-VERSION="7.0"
+set -euo pipefail
+
+VERSION="7.1"
 HPCNAME="Proteus"
 
 # Colors
@@ -25,7 +27,7 @@ main_menu() {
     while true; do
         clear
         head
-        echo -e "${YELLOW}============= OPTIONS ============="
+        echo -e "${YELLOW}============= MAIN MENU ============="
         echo -e "1 - Display status of your jobs"
         echo -e "2 - Check in loop"
         echo -e "3 - Cancel a job"
@@ -35,7 +37,7 @@ main_menu() {
         echo -e "7 - Job statistic"
         echo -e "-----------------------------------"
         echo -e "8 - Partition options >>"
-        echo -e "9 - Module options >>"
+        echo -e "9 - Tools >>"
         echo -e "-----------------------------------"
         echo -e "e - Exit${NC}"
         echo
@@ -129,7 +131,7 @@ main_menu() {
                 partition_menu
                 ;;
             9)
-                module_menu
+                tools_menu
                 ;;
             e)
                 echo
@@ -150,7 +152,7 @@ partition_menu() {
         clear
         head
         echo -e "${YELLOW}======== PARTITION OPTIONS ========"
-        echo -e "1 - Partitions available"
+        echo -e "1 - Available partitions"
         echo -e "2 - Partition load (${RED}aprox.${YELLOW})"
         echo -e "3 - User and partition"
         echo -e "4 - User and jobs (${RED}slow${YELLOW})"
@@ -163,7 +165,7 @@ partition_menu() {
 
         case "$subchoice_partition" in
             1)
-                echo -e "\n${PURPLE}**** PARTITION AVAILABLE ****${NC}\n"
+                echo -e "\n${PURPLE}**** AVAILABLE PARTITIONS ****${NC}\n"
                 # Print table header
                 sacctmgr show assoc user=$USER format=Cluster,Account,User,QOS,DefaultQOS
 
@@ -340,40 +342,55 @@ partition_menu() {
     done
 }
 
-module_menu() {
+tools_menu() {
     while true; do
         clear
         head
-        echo -e "${YELLOW}========== MODULE OPTIONS ========="
-        echo -e "1 - Search for tool in module list"
-        echo -e "2 - xxx"
+        echo -e "${YELLOW}============ TOOLS MENU ==========="
+        echo -e "1 - Submission file generator ${RED}(beta)${YELLOW}"
+        echo -e "2 - Search module"
+        echo -e "3 - No kick-out"
         echo -e "-----------------------------------"
         echo -e "r - Return main menu"
         echo -e "e - Exit${NC}"
         echo
 
-        read -r -p "Choose an option: " subchoice_module
+        read -r -p "Choose an option: " subchoice_tools
 
-        case "$subchoice_module" in
+        case "$subchoice_tools" in
             1)
+                echo -e "\n${PURPLE}**** SUBMISSION FILE GENERATOR ****${NC}\n"
+                source $JOBEXPLORERPATH/submit_generator.sh
+                echo -e "Press ENTER to continue..."
+                read foo;;
+            2)
                 echo -e "\n${PURPLE}**** SEARCH TOOL AVAILABLE ****${NC}\n"
-                read -rp "Program name to search for: " prog
+                source $JOBEXPLORERPATH/search_module.sh
+                echo -e "Press ENTER to continue..."
+                read foo;;
+            3)
+                FRAME_DIR="$JOBEXPLORERPATH/frames"
+                dela=0.2 # Refresh delay
 
-                if [[ -z "$prog" ]]; then
-                    echo "Error: you did not enter a program name."
+                # Check if directory exists
+                if [ ! -d "$FRAME_DIR" ]; then
+                    echo -e "${REDYELLOW}ERROR: directory '$FRAME_DIR' does not exist.\n${NC}"
                     exit 1
                 fi
 
-                results=$(module -t avail 2>&1 | grep -i -- "$prog")
+                while true; do
+                    for frame in "$FRAME_DIR"/*.frm; do
+                        [ -e "$frame" ] || echo -e "${REDYELLOW}ERROR: Frames files not found.\n${NC}", exit 1  # Skip if no *.frm f>
 
-                if [[ -n "$results" ]]; then
-                    echo "$results"
-                else
-                    echo "No modules found containing: $prog"
-                fi
-                read foo;;
-            2)
-                echo -e "Press ENTER to continue..."
+                        clear
+                        head
+                        echo -e "${PURPLE}**** NO KICK OUT ****\e[0m\n"
+                        echo -e "${GREEN}"
+                        cat "$frame"
+                        echo -e "\n${RED}Press Ctrl+c to exit.${NC}"
+                        sleep $dela
+                    done
+                done
                 read foo;;
             r)
                 return;;
